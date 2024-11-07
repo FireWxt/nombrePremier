@@ -1,4 +1,13 @@
-// Simon / Gabin / Jaures / Cabrel
+/**
+ * \file NombrePremier.cpp
+ * \brief Programme de tests du multithread pour trouver des nombres premiers.
+ * \author Simon.D, Gabin.D, Cabrel, Jaures
+ * \version 0.1
+ * \date 7 Novembre 2024
+ *
+ * Programme de tests du multithread sur des nombres premiers.
+ * Utilise des threads pour calculer les nombres premiers dans un intervalle donné.
+ */
 
 #include <iostream>
 #include <cmath>
@@ -8,9 +17,18 @@
 #include <fstream>
 #include <mutex>
 
-
+ /// Liste globale pour stocker les nombres premiers trouvés.
 std::vector<int> listePremier;
 
+/**
+ * \brief Fonction qui vérifie si un nombre est premier.
+ *
+ * Cette fonction détermine si un nombre entier est premier ou non.
+ * Elle fonctionne en vérifiant si le nombre est divisible par 2, 3 ou tout autre nombre premier inférieur à sa racine carrée.
+ *
+ * \param valeur Entier à tester pour savoir s'il est premier.
+ * \return true si le nombre est premier, false sinon.
+ */
 bool estPremier(int valeur)
 {
     if (valeur == 2 || valeur == 3 || valeur == 5 || valeur == 7)
@@ -31,12 +49,18 @@ bool estPremier(int valeur)
     return true;
 }
 
-
-
-
+/**
+ * \brief Fonction qui calcule les nombres premiers dans un intervalle en utilisant un thread.
+ *
+ * Cette fonction permet à un thread de rechercher les nombres premiers dans un intervalle défini par les paramètres `id`, `fin` et `threadsUtilise`.
+ * Chaque thread parcourt les nombres dans l'intervalle en fonction de son ID et de l'utilisation du multithreading.
+ *
+ * \param id L'index du thread (utilisé pour répartir le travail entre les threads).
+ * \param fin La valeur maximale de l'intervalle dans lequel chercher des nombres premiers.
+ * \param threadsUtilise Le nombre total de threads pour la division du travail.
+ */
 void trouverNombresPremiers(int id, int fin, int threadsUtilise)
 {
-
     std::vector<int> resultatsLocaux;
     for (int i = id; i <= fin; i += threadsUtilise)
     {
@@ -46,23 +70,31 @@ void trouverNombresPremiers(int id, int fin, int threadsUtilise)
         }
     }
 
+    // Insertion des résultats locaux dans la liste principale des nombres premiers
     listePremier.insert(listePremier.end(), resultatsLocaux.begin(), resultatsLocaux.end());
-
 }
 
-
+/**
+ * \brief Fonction qui gère le calcul des nombres premiers en utilisant des threads.
+ *
+ * Cette fonction initialise les threads et les répartit pour calculer les nombres premiers dans l'intervalle de 1 à `fin`.
+ * Les résultats sont ensuite enregistrés dans un fichier.
+ *
+ * \param threadsUtilise Le nombre de threads à utiliser pour le calcul.
+ * \param fin La valeur maximale pour l'intervalle dans lequel chercher des nombres premiers.
+ */
 void calculerNombresPremiers(int threadsUtilise, int fin)
 {
-
-
     std::vector<std::thread> listeAsync;
     auto begin = std::chrono::high_resolution_clock::now();
 
+    // Création des threads pour rechercher les nombres premiers dans l'intervalle
     for (int i = 0; i < threadsUtilise; i++)
     {
         listeAsync.push_back(std::thread(trouverNombresPremiers, i, fin, threadsUtilise));
     }
 
+    // Attente de la fin de l'exécution de tous les threads
     for (auto& t : listeAsync)
     {
         t.join();
@@ -73,7 +105,7 @@ void calculerNombresPremiers(int threadsUtilise, int fin)
 
     std::cout << elapsed.count() << " microsecondes  " << " \t";
 
-
+    // Enregistrement des résultats dans un fichier
     std::ofstream fichier("nombres_premiers.txt");
     fichier.clear();
     if (fichier.is_open())
@@ -91,12 +123,19 @@ void calculerNombresPremiers(int threadsUtilise, int fin)
     }
 }
 
+/**
+ * \brief Fonction principale qui gère l'exécution du programme.
+ *
+ * Cette fonction initialise le nombre de threads à utiliser et appelle la fonction `calculerNombresPremiers` pour différentes plages de nombres.
+ *
+ * \return Code de retour (0 si le programme s'est bien exécuté).
+ */
 int main()
 {
-
     int threadsUtilise = std::thread::hardware_concurrency();
 
-    calculerNombresPremiers(1, 10000);;
+    // Exécution des calculs pour différents intervalles
+    calculerNombresPremiers(1, 10000);
     calculerNombresPremiers(threadsUtilise, 10000);
     calculerNombresPremiers(1, 100000);
     calculerNombresPremiers(threadsUtilise, 100000);
