@@ -17,12 +17,12 @@
 #include <fstream>
 #include <mutex>
 
- /// Liste globale pour stocker les nombres premiers trouvés.
+/// Liste globale pour stocker les nombres premiers trouvés.
 std::vector<int> listePremier;
 
 /**
  * \brief Fonction qui vérifie si un nombre est premier.
- *
+ * 
  * Cette fonction détermine si un nombre entier est premier ou non.
  * Elle fonctionne en vérifiant si le nombre est divisible par 2, 3 ou tout autre nombre premier inférieur à sa racine carrée.
  *
@@ -51,7 +51,7 @@ bool estPremier(int valeur)
 
 /**
  * \brief Fonction qui calcule les nombres premiers dans un intervalle en utilisant un thread.
- *
+ * 
  * Cette fonction permet à un thread de rechercher les nombres premiers dans un intervalle défini par les paramètres `id`, `fin` et `threadsUtilise`.
  * Chaque thread parcourt les nombres dans l'intervalle en fonction de son ID et de l'utilisation du multithreading.
  *
@@ -76,7 +76,7 @@ void trouverNombresPremiers(int id, int fin, int threadsUtilise)
 
 /**
  * \brief Fonction qui gère le calcul des nombres premiers en utilisant des threads.
- *
+ * 
  * Cette fonction initialise les threads et les répartit pour calculer les nombres premiers dans l'intervalle de 1 à `fin`.
  * Les résultats sont ensuite enregistrés dans un fichier.
  *
@@ -124,23 +124,59 @@ void calculerNombresPremiers(int threadsUtilise, int fin)
 }
 
 /**
- * \brief Fonction principale qui gère l'exécution du programme.
+ * \brief Fonction qui calcule la rentabilité du multithreading pour le calcul des nombres premiers.
+ * 
+ * Cette fonction calcule le pourcentage de rentabilité du multithreading en comparant le temps d'exécution avec un seul thread et avec plusieurs threads.
  *
+ * \param threadsUtilise Le nombre de threads à utiliser pour le calcul.
+ * \param fin La valeur maximale pour l'intervalle dans lequel chercher des nombres premiers.
+ * \param maxThreads Le nombre maximal de threads disponibles.
+ * \return Le pourcentage de rentabilité.
+ */
+double calculerRentabilite(int threadsUtilise, int fin, int maxThreads)
+{
+    // Temps d'exécution avec un seul thread
+    auto beginSingle = std::chrono::high_resolution_clock::now();
+    calculerNombresPremiers(1, fin);
+    auto endSingle = std::chrono::high_resolution_clock::now();
+    auto elapsedSingle = std::chrono::duration_cast<std::chrono::microseconds>(endSingle - beginSingle);
+
+    // Temps d'exécution avec le nombre de threads spécifié
+    auto beginMulti = std::chrono::high_resolution_clock::now();
+    calculerNombresPremiers(threadsUtilise, fin);
+    auto endMulti = std::chrono::high_resolution_clock::now();
+    auto elapsedMulti = std::chrono::duration_cast<std::chrono::microseconds>(endMulti - beginMulti);
+
+    // Calcul du pourcentage de rentabilité
+    double rentabilite = ((elapsedSingle.count() - elapsedMulti.count()) / static_cast<double>(elapsedSingle.count())) * 100;
+
+    return rentabilite;
+}
+
+/**
+ * \brief Fonction principale qui gère l'exécution du programme.
+ * 
  * Cette fonction initialise le nombre de threads à utiliser et appelle la fonction `calculerNombresPremiers` pour différentes plages de nombres.
+ * Elle appelle également la fonction `calculerRentabilite` pour afficher la rentabilité du multithreading.
  *
  * \return Code de retour (0 si le programme s'est bien exécuté).
  */
 int main()
 {
     int threadsUtilise = std::thread::hardware_concurrency();
+    int maxThreads = std::thread::hardware_concurrency();
 
-    // Exécution des calculs pour différents intervalles
-    calculerNombresPremiers(1, 10000);
+    /*calculerNombresPremiers(1, 10000);
     calculerNombresPremiers(threadsUtilise, 10000);
     calculerNombresPremiers(1, 100000);
     calculerNombresPremiers(threadsUtilise, 100000);
     calculerNombresPremiers(1, 1000000);
-    calculerNombresPremiers(threadsUtilise, 1000000);
+    calculerNombresPremiers(threadsUtilise, 1000000);*/
 
+    // Calcul de la rentabilité pour différents 
+    double rentabilite = calculerRentabilite(threadsUtilise, 1000000, maxThreads);
+    std::cout << "Rentabilite du multithreading pour 1000000 : " << rentabilite << "%" << std::endl;
+    double rentabilite2 = calculerRentabilite(threadsUtilise, 10000000, maxThreads);
+    std::cout << "Rentabilite du multithreading pour 10000000 : " << rentabilite2 << "%" << std::endl;
     return 0;
 }
