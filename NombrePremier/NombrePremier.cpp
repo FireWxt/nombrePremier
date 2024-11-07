@@ -1,20 +1,40 @@
-// NombrePremier.cpp : Ce fichier contient la fonction 'main'. L'exécution du programme commence et se termine à cet endroit.
-//
+// Simon / Gabin / Jaures / Cabrel
 
 #include <iostream>
+#include <cmath>
+#include <vector>
+#include <thread>
+#include <chrono>
+#include <fstream>
+#include <mutex>
+
+
+std::vector<int> listePremier;
+
+bool estPremier(int valeur)
+{
+    if (valeur == 2 || valeur == 3 || valeur == 5 || valeur == 7)
+    {
+        return true;
+    }
+    else if (valeur == 1 || valeur % 2 == 0)
+    {
+        return false;
+    }
+    for (int i = 3; i <= std::round(std::sqrt(valeur)); i += 2)
+    {
+        if (valeur % i == 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+
 
 int main()
 {
-    std::cout << "Hello World!\n";
+
 }
-
-// Exécuter le programme : Ctrl+F5 ou menu Déboguer > Exécuter sans débogage
-// Déboguer le programme : F5 ou menu Déboguer > Démarrer le débogage
-
-// Astuces pour bien démarrer : 
-//   1. Utilisez la fenêtre Explorateur de solutions pour ajouter des fichiers et les gérer.
-//   2. Utilisez la fenêtre Team Explorer pour vous connecter au contrôle de code source.
-//   3. Utilisez la fenêtre Sortie pour voir la sortie de la génération et d'autres messages.
-//   4. Utilisez la fenêtre Liste d'erreurs pour voir les erreurs.
-//   5. Accédez à Projet > Ajouter un nouvel élément pour créer des fichiers de code, ou à Projet > Ajouter un élément existant pour ajouter des fichiers de code existants au projet.
-//   6. Pour rouvrir ce projet plus tard, accédez à Fichier > Ouvrir > Projet et sélectionnez le fichier .sln.
